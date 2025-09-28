@@ -6,17 +6,23 @@ const { Events, MessageFlags } = require('discord.js');
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
-        // Ignoring all inputs except slash commands
-        if (!interaction.isChatInputCommand()) return;
-
         // Accessing client's respective command
         const command = interaction.client.commands.get(interaction.commandName);
-
         // If not found -> log the error and do nothing
         if (!command) {
             console.error(`No command matching ${interaction.commandName} was found.`);
             return;
         }
+
+        // Autocompleting command's option if requested
+        if (interaction.isAutocomplete()) {
+            try { await command.autocomplete(interaction); }
+            catch (error) { console.error(error); }
+            finally { return; }
+        }
+
+        // Ignoring all inputs except slash commands
+        if (!interaction.isChatInputCommand()) return;
 
         // Trying to execute the command otherwise
         try {
